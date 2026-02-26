@@ -7,6 +7,7 @@ SELECT COUNT(*) FROM ORDERS;
 SELECT COUNT(*) FROM ORDER_ITEM;
 
 -- 주문 테이블에서 앞쪽 데이터 5개만 조회
+-- 주문 테이블에서 앞쪽 데이터 5개만 조회
 SELECT * FROM ORDERS WHERE rownum < 5;
 
 
