@@ -1,0 +1,14 @@
+-- NULL 데이터로 발생하는 현상
+-- NULL은 개수나, 통계에서 계산되지 않는 문제발생
+SELECT SUM(SALARY), COUNT(SALARY), COUNT(*)
+FROM EMPLOYEE;
+
+-- NVL() NULL 여부를 판단, 값이 NUL일 경우 다른 데이터로 반환
+SELECT EMP_ID
+	 , EMP_NAME 
+	 , NVL(SALARY, 0) AS "SALARY"
+	 , NVL2(SALARY, 'O', 'X') AS "IS_SALARY_ON"
+	 , TO_CHAR(HIRE_DATE, 'YYYY-MM-DD') AS "입사일" 
+	 , DEPT_ID
+FROM EMPLOYEE;
+-- WHERE SALARY IS NULL;

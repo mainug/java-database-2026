@@ -304,12 +304,103 @@
 
 ### 함수
 
+- 날짜 포맷 단어
+    - YYYY, YY - 년도 네자리(2026), 두자리(26)
+    - MM, MON, MONTH - 월 두자리(03), MAR, MARCH
+    - DD, DDD, DY, DAY - 일 두자리(03), 62(1월 1일부터 며칠 째), TUE(화), TUESDAY(화요일)
+    - HH24, HH, HH12 - 24시간, 12시간 표현
+    - MI - 분
+    - SS - 초
+    - AM, PM - 오전, 오후
+
 - 오라클 함수 계속
-    - 날짜함수
+    - 날짜함수 - [쿼리](./day03/1.오라클함수.sql)
+        - `sysdate` - 기본, 현재 일시를 리턴
+        - `ADD_MONTHS`(날짜컬럼, 정수) - 양수는 이후 달, 음수는 이전 달
+        - `MONTH_BETWEEN`(비교날짜1, 비교날짜2) - 두 날짜사이의 개월 수
+        - `NEXT_DAY`(날짜, '요일') - 날짜 이후의 해당 요일 날짜 리턴
+        - `LAST_DAY`(날짜) - 해당 날짜의 마지막 일 리턴
+
     - 형변환함수
-    - NULL처리함수
-    - DECODE, CASE
+        - `TO_CHAR`(날짜, '날짜포맷') - 날짜를 해당 포맷에 맞게 변경해서 표현
+        - `TO_CHAR`(숫자, '숫자포맷') - 숫자를 해당 포맷에 맞게 변경해서 표현
+        - `TO_NUMBER`(숫자로만된문자데이터, '숫자포맷') - 수로 된 문자열을 숫자로 변경
+        - `TO_DATE`(날짜형식문자데이터, '날짜포맷') - 문자데이터를 날짜데이터로 변경
+
+    - NULL처리함수 - [쿼리](./day03/2.NULL함수.sql)
+        - NULL(데이터없음)은 일부 개수처리나 통계 불가, NULL값 처리 필요
+        - `NVL`(NULL이들어간데이터, NULL처리) - 해당 값이 NULL이면 보통 0으로 변환
+        - `NVL2`(NULL이들어간데이터, NULL이아닐때처리, NULL일때처리) - NULL이 아닐 때와 NULL일 때로 나눠서 처리
+
+    - DECODE, CASE - [쿼리](./day03/3.decode_case.sql)
+        - 특정 열의 데이터가 어떤 데이터인지에 따라 다르게 처리할 때
+        - python의 if ~ elif ~ elif와 동일한 의미
+        - `DECODE`(컬럼, 조인, 결과, ...) - 오라클 전용함수
+        - `CASE`문 - CASE ~ WHEN ~ THEN ~ END ...
 
 ### 데이터 그룹화
 
+- 다중행 함수 - [쿼리](./day03/4.다중행함수.sql)
+    - 여러 행의 데이터를 바탕으로 하나의 결과를 도출하는 함수
+    - `SUM`() - 데이터의 합. 급여, TAX, 점수 등 의미있는 데이터만 합산
+    - `COUNT`() - 데이터의 개수. NULL에 지대한 영향을 받음. 데이터행에 영향 받지 않음. *(ALL)도 가능
+    - `AVG`() - 데이터의 평균. NULL에 영향을 받기 때문에 NULL값은 항상 0 등으로 변경해주고 계산
+    - `MIN`() - 데이터 중 최소값. 날짜, 문자열도 가능
+    - `MAX`() - 데이터 중 최대값. 날짜, 문자열도 가능
+
+- 그룹화 - [쿼리](./day03/5.그룹화.sql)
+
+    ```sql
+    -- 나머지는 이전과 동일. 다중행함수와 GROUP BY가 추가됨
+    SELECT [기존과 동일], 다중행함수
+    FROM [테이블명|dual]
+    WHERE [조건식]
+    GROUP BY [그룹화할 열 지정] [ROLLUP|CUBE|GROUPING SETS]
+    ORDER BY [정렬조건]
+    ```
+
+    - 그룹화 시 주의점
+        - SELECT절에 다중행 함수 외 일반 컬럼을 사용하려면 반드시 GROUP BY 절에 일반 컬럼이 들어가있어야 한다
+        - `단일 그룹의 그룹 함수가 아닙니다` 오류 메세지가 나타남
+
+- HAVING절
+    - 일반 SELECT절의 조건은 WHERE절로 처리
+    - 다중행 함수 등의 조건은 HAVING절로 처리해야함
+    - 다중행(그룹) 함수는 WHERE절에 사용불가
+
+- 그룹화 관련 함수 - [쿼리](./day03/6.그룹화2.sql)
+    - `ROLLUP` - 해당 컬럼별 합계 도출
+    - `CUBE` - 해당 컬럼별 상세 소계 도출
+    - GROUPING SETS - 차후...
+    - `PIVOT` - 일반 데이터(세로출력)를 가로출력으로 변경
+
+### sample DB 생성
+
+```bash
+> docker exec -it oracle-xe sqlplus sys/oracle as sysdba
+
+SQL*Plus: Release 21.0.0.0.0 - Production on Tue Mar 3 05:56:46 2026
+Version 21.3.0.0.0
+
+Copyright (c) 1982, 2021, Oracle.  All rights reserved.
+
+Connected to:
+Oracle Database 21c Express Edition Release 21.0.0.0.0 - Production
+Version 21.3.0.0.0
+
+SQL> alter session set "_oracle_script"=true;
+SQL> create user scott identified by tiger
+  2  default tablespace users quota unlimited on users;
+SQL> grant connect, resource, dba to scott;
+SQL> alter session set "_oracle_script"=true;
+SQL> alter session set nls_date_language='american';
+SQL> alter session set nls_date_format='dd-MON-rr'; 
+```
+
 ### 조인
+
+- 조인 기본 - [쿼리](./day03/7.조인.sql)
+
+## Day04
+
+- 조인 계속

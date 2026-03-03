@@ -1,0 +1,76 @@
+-- scott 계정!
+-- 부서번호와 직군별 그룹화
+SELECT DEPTNO, JOB
+	 , COUNT(*)
+	 , MAX(SAL)
+	 , avg(SAL)
+FROM EMP
+GROUP BY DEPTNO, JOB
+ORDER BY DEPTNO;
+
+-- ROLLUP 함수를 적용한 그룹화
+SELECT DEPTNO
+	 , COUNT(*)
+	 , MAX(SAL)
+	 , avg(SAL)
+FROM EMP
+GROUP BY ROLLUP(DEPTNO)
+ORDER BY DEPTNO;
+
+-- ROLLUP 첫번째 컬럼의 값으로 소계, 전체 총계를 도출
+SELECT DEPTNO, JOB
+	 , COUNT(*)
+	 , MAX(SAL)
+	 , avg(SAL)
+FROM EMP
+GROUP BY ROLLUP(DEPTNO, JOB)
+ORDER BY DEPTNO;
+
+-- 각각의 컬럼별로 소계, 전체 총계를 도출
+SELECT DEPTNO, JOB
+	 , COUNT(*)
+	 , MAX(SAL)
+	 , avg(SAL)
+FROM EMP
+GROUP BY CUBE(DEPTNO, JOB)
+ORDER BY DEPTNO;
+
+SELECT DEPTNO, JOB
+	 , COUNT(*)
+	 , MAX(SAL)
+	 , avg(SAL)
+FROM EMP
+GROUP BY JOB, ROLLUP(DEPTNO)
+ORDER BY JOB;
+
+-- GROUPING SETS
+-- GROUPING 함수 : SELECT절에 GROUPING 적용
+-- 실무에서는 각 그룹(다중행)함수에 별명을 지정 사용
+SELECT DEPTNO, JOB
+	 , COUNT(*) AS "직원수"
+	 , MAX(SAL) AS "최고급여"
+	 , avg(SAL) AS "평균급여"
+	 , GROUPING(JOB) AS "JOB_GRID"
+	 , GROUPING(DEPTNO) AS "DEP_GRID"
+	 , GROUPING_ID(DEPTNO, JOB)
+FROM EMP
+GROUP BY ROLLUP(DEPTNO, JOB)
+ORDER BY DEPTNO;
+
+-- PIVOT
+-- 부서별, 직책별로 그룹화 최고 급여 조회, 피벗 없이 일반적
+SELECT DEPTNO, JOB, MAX(SAL)
+FROM EMP
+GROUP BY DEPTNO, JOB
+ORDER BY DEPTNO, JOB;
+
+-- ROLLUP, CUBE를 몰라도 SubQuery로 구현 가능
+
+-- PIVOT 함수 사용
+SELECT *
+FROM (SELECT DEPTNO, JOB, SAL
+	  FROM EMP)
+PIVOT(MAX(SAL) FOR DEPTNO IN (10, 20, 30))
+ORDER BY JOB;
+
+-- PIVOT 몰라도 CASE - WHEN으로 구현 가능
