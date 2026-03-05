@@ -1,0 +1,16 @@
+-- DDL - CREATE
+
+-- 테이블 생성
+CREATE TABLE EMP_DDL (
+	EMPNO		NUMBER(4), -- 4자리 정수
+	ENAME		VARCHAR2(10),
+	JOB			VARCHAR2(9),
+	MGR			NUMBER(4),
+	HIREDATE	DATE,
+	SAL			NUMBER(7, 2), -- 7자리중 소수점 2자리
+	COMM		NUMBER(7, 2),
+	DEPNO		NUMBER(2)
+);
+
+-- 테이블 삭제
+DROP TABLE EMP_DDL;
