@@ -1,0 +1,17 @@
+ㅁ-- PL/SQL IF문
+DECLARE
+	v_score NUMBER := 87;
+BEGIN
+	IF v_score >= 90 THEN
+		DBMS_OUTPUT.PUT_LINE('A학점');
+	ELSIF v_score >= 80 THEN
+		DBMS_OUTPUT.PUT_LINE('B학점');
+	ELSIF v_score >= 70 THEN
+		DBMS_OUTPUT.PUT_LINE('C학점');
+	ELSIF v_score >= 60 THEN
+		DBMS_OUTPUT.PUT_LINE('D학점');
+	ELSE
+		DBMS_OUTPUT.PUT_LINE('F학점');
+	END IF;
+	-- CASE WHEN THEN으로 변경 가능
+END;

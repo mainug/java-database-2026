@@ -1,0 +1,48 @@
+-- system 계정으로 실행
+-- 사용자 생성
+-- 아래와 같이 사용자를 생성하면 INSERT 등 저장에 문제 발생
+CREATE USER orclstudy
+IDENTIFIED BY oracle;
+
+-- 아래와 같이 사용자를 생성해야 문제가 발생하지 않음
+CREATE USER orclstudy
+IDENTIFIED BY oracle
+DEFAULT TABLESPACE USERS
+TEMPORARY TABLESPACE TEMP
+QUOTA UNLIMITED ON USERS; -- 무제한 용량
+
+-- 또는 용량 제한
+ALTER USER ORCLSTUDY
+QUOTA 100M ON USERS;
+
+-- 아직까지 접속 불가
+-- 접속 권한 추가
+GRANT CREATE SESSION TO orclstudy;
+
+-- 사용자 정보확인
+SELECT *
+FROM ALL_USERS;
+
+SELECT *
+FROM DBA_OBJECTS
+WHERE OWNER = 'ORCLSTUDY';
+
+-- ALTER로 사용자 패스워드 변경
+ALTER USER ORCLSTUDY
+IDENTIFIED BY "oracle#!";
+
+-- DROP으로 사용자 삭제
+DROP USER ORCLSTUDY CASCADE;
+
+-- orclstudy에 테이블 생성 권한 부여
+GRANT CREATE TABLE TO ORCLSTUDY;
+GRANT INSERT ANY TABLE TO ORCLSTUDY;
+GRANT RESOURCE TO ORCLSTUDY;
+
+-- ORA-01950 : 테이블스페이스 'USERS'에 대한 권한이 없습니다.
+-- 테이블스페이스 저장권한(Quota)이 없어서 발생
+ALTER USER ORCLSTUDY
+QUOTA UNLIMITED ON USERS;
+
+-- 권한 취소
+REVOKE RESOURCE, CREATE TABLE FROM ORCLSTUDY
