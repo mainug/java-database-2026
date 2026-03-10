@@ -525,6 +525,22 @@ SQL> alter session set nls_date_format='dd-MON-rr';
         WHERE 삭제할대상행 선별하는 조건 -- 매우 중요!
         ```
 
+    - `MERGE` - INSERT와 UPDATE를 스마트하게 처리하는 쿼리(추후 반드시 추가 공부)
+        - PK가 존재하면 UPDATE, PK값이 없으면 INSERT를 수행
+
+        ```sql
+        -- 예시, EMP 테이블에 같은 EMPNO 값이 있을 때와 없을 때 다르게 수정 
+        MERGE INTO SCOTT.EMP AS tgt
+        USING SOURCE_TABLE AS src
+        ON (tgt.EMPNO=src.EMPNO)
+        WHEN MATCHED
+        THEN UPDATE SET
+        tgt.ENAME=src.ENAME, tgt.JOB=src.JOB, tgt.MGR=src.MGR, tgt.HIREDATE=src.HIREDATE, tgt.SAL=src.SAL, tgt.COMM=src.COMM, tgt.DEPTNO=src.DEPTNO
+        WHEN NOT MATCHED
+        THEN INSERT (EMPNO, ENAME, JOB, MGR, HIREDATE, SAL, COMM, DEPTNO)
+        VALUES (src.EMPNO, src.ENAME, src.JOB, src.MGR, src.HIREDATE, src.SAL, src.COMM, src.DEPTNO);
+        ```
+
 ### TCL
 
 - 트랜잭션 - [쿼리](./day05/3.트랜잭션.sql)
@@ -985,8 +1001,138 @@ SQL> alter session set nls_date_format='dd-MON-rr';
     END;
     ```
 
-### 파이썬 오라클 연동
+## Day08
 
 ### DBeaver 툴 사용법
 
+- 사용 이유
+    - DB개발툴을 잘 사용하면 복잡한 쿼리를 직접 만들지 않고 쉽게 작업할 수 있음
+    - SQL Plus(콘솔)에서 로그인 정보를 상시 입력, 쿼리 작성 시 오타 발생
+    - Content Assistant 등의 기능이 쿼리 작성에 도움을 줌
+
+- DBeaver 세션별 그룹
+    - `Schemas` - 사용자가 만든 DB 객체들 저장. 여기서 대부분의 작업 수행
+    - Global metadata - 전체 DB 구조를 보여주는 곳
+    - Storage - 실제 물리적 저장소 정보
+    - Security - 사용자 계정에 관한 정보
+    - Administer - DB 운영관리 기능, 세션관리. 락관리
+
+- Schemas 내
+    - 자신의 계정에 속한 스키마(굵은체)만 작업하면 됨
+    - Tables, Views, Indexes, Sequences, Procedures, Functions, Table Triggers 위주로만 작업
+
+- `Tables`
+    - 생성된 테이블에서  Columns, Constraints, Foriegn Keys, Triggers, Indexes, DDL 정도 예의 주시하면서 작업
+    - Tables에서 마우스 오른쪽 버튼으로 컨텍스트 메뉴 중 `Create New Table`만 사용
+    - Columns 탭에서 `Create New Column`으로 새 컬럼 생성. PK, UK, NOT NULL 지정 후 Save
+
+- Views
+    - Create New View로 새 뷰 생성
+    - 뷰 이름 입력 후 Declaration에서 SELECT 쿼리 작성 후 Save
+
+- Indexes
+    - 생성된 인덱스만 확인
+    - Tables > Create New Table, View Table에서 Indexes탭 내 `Create New Index`로 생성
+
+- Sequences - 나머지 객체와 독립적
+    - Create New Sequence로 시퀀스명 작성 후 생성
+    - MAXVALUE, MINVALUE, INCREMENT 입력 후 저장
+
+- PROCEDURES
+    - Create New Procedure 후 창에서 이름 입력, 타입을 PROCEDURE로 선택, 확인
+    - Declaration에서 PL/SQL 작성 후 저장
+    - PROCEDURE와 FUNCTION은 컴파일 되는 개체
+
+    ![alt text](image-16.png)
+
+- FUNCTIONS
+    - 프로시저와 동일. 타입을 FUNCTION으로 선택, 확인
+
+- Table Triggers
+    - 생성된 트리거만 확인
+    - 테이블 Triggers 탭에서 Create New Trigger로 생성. Declaration에서 작성
+    - SQL 에디터에서 작성
+
+- 메뉴 > 데이터베이스 > 커밋, 롤백, 트랜잭션 모드는 DB에 맞게 잘 사용할 것
+    - Ctrl + + : 글자크기 크게
+    - Ctrl + - : 글자크기 작게
+    - 툴바의 접속된 세션(현재, XE - scott)확인. 사용중인 스키마를 작업 도중 자주 확인
+    - `트랜잭션`은 UPDATE, DELETE 작업 전엔 반드시 확인하고 진행
+
+        ![alt text](image-17.png)
+
+    - 각 테이블 마우스 오른쪽 버튼 > SQL 생성
+        - INSERT 부터 DDL 까지 전부 존재
+        - 단, SELECT 문은 거의 효과가 없음, 너무 단순
+
+### 파이썬 오라클 연동
+
+- 주피터노트북 사용
+    - VS CODE > 명령 팔레트 실행(Ctrl + Shift + P)
+
+- 오라클 `CRUD` 연동 - [소스](./day08/1.오라클연동.ipynb)
+    - Create Read Update Delete 약자
+    - INSERT SELECT UPDATE DELETE 명령어와 1:1 매핑
+    - 실무에서 CRUD를 분해해서 지시(CRU, R, CRUD...)
+
+- BULK INSERT - [소스](./day08/2.BulkInsert.ipynb)
+    - 대용량 데이터 처리 방법
+
 ### DB 설계
+
+- 데이터 모델링
+    - 현실세계 데이터를 DB 내에 옮기기 위해 데이터베이스를 설계
+    - `모델링 순서` - 요구사항 분석 > 개념적 모델링> 논리적 모델링 > 물리적 모델링
+
+- `프로그램 구현 순서`
+    - 요구사항 분석 > 설계 > 구현/코딩 > 테스트 및 디버깅 > 배포 > 유지보수 및 운영
+    - 모델링은 프로그래밍 구현의 설계에 포함
+
+- 요구사항 분석
+    - 업무를 파악하고, 개발자와 업무담당자 간의 의사소통으로 필요한 데이터 정의
+    - DB 목적, 기능, 제약사항 정리 `요구사항 정의서` 산출
+
+- 개념 데이터 모델링
+    - 핵심 엔티티(테이블과 매핑)를 식별. 각 엔티티별 관계를 정의하는 논리구조 도식화
+    - 추상화 ERD(Entity Relationship Diagram)를 작성
+
+    ![alt text](image-18.png)
+
+- 논리 데이터 모델링
+    - 개념 데이터 모델링 바탕으로 속성, 키, 관계 명확히 정의
+    - 데이터 중복을 최소화 하기위한 **정규화** 수행
+    - 관계형 데이터 모델(테이블)로 구체화
+    - 논리(물리와 매칭) ERD 작성
+
+    ![alt text](image-19.png)
+
+- 물리 데이터 모델링
+    - 실제 사용하는 DBMS 특성(Oracle, MySQL, SQLServer...)를 고려해서 설계
+    - 테이블, 컬럼, 인덱스, 제약조건, `시퀀스` 등을 생성하고, 성능을 위해서 **반정규화** 진행
+    - 최종 스키마 완성
+
+    ![alt text](image-20.png)
+
+- 위 모델링을 1회성이 아닌, 기능 추가/변경으로 `지속적인 업데이트` 수행
+
+### 데이터베이스 모델링 툴
+
+- 모델링 툴
+    - 논리/물리 모델링을 컴퓨터 상에서 할 수 있는 개발툴
+
+- 종류
+    - ERWin - 퀘스트 사에서 만든 ERD 작성 개발툴, 유료
+    - eXERD - 한국산 모델링툴, 이클립스 기반, 유료
+    - ER/Studio - 대규모 엔터프라이즈 데이터 아키텍처 모델링툴
+    - Draw.io - https://app.diagrams.net/ 무료, 다양한 다이어그램, SQL 변환 불가
+    - `erdcloud` - https://www.erdcloud.com/ 모델링에 물리 스키마까지 생성가능한 한국어 지원도구
+    - DBeaver - 물리적 테이블 생성 후 다이어그램 확인 가능. 모델링은 불가. 뷰어
+    - MySQL Workbench - 물리적 다이어그램 생성 가능, 생성한 그대로 DB가 됨
+
+#### ERDCLOUD
+
+- 회원가입 후 로그인
+
+1. ERD 생성 클릭
+
+    ![alt text](image-21.png)
